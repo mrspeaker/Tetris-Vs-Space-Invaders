@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Tetris Vs Space Invaders</title>
+    </head>
+    <body>
+        <canvas id="screen" width="450" height="450"></canvas>
+
+        <script src="lib/coffee-script.js" type="text/javascript" charset="utf-8"></script>
+        <script src="lib/underscore.js" type="text/javascript" charset="utf-8"></script>
+        <script src="scripts/Utils.js" type="text/javascript" charset="utf-8"></script>
+        <script src="scripts/Input.js" type="text/javascript" charset="utf-8"></script>
+        <script src="scripts/art/Sprite.js" type="text/javascript" charset="utf-8"></script>
+        <script src="scripts/art/Art.js" type="text/javascript" charset="utf-8"></script>
+        <script src="scripts/screen/Screen.js" type="text/javascript" charset="utf-8"></script>
+        <script src="scripts/screen/TitleScreen.js" type="text/javascript" charset="utf-8"></script>
+        <script src="scripts/screen/GameScreen.js" type="text/javascript" charset="utf-8"></script>
+        <script src="scripts/screen/PauseScreen.js" type="text/javascript" charset="utf-8"></script>
+        <script src="scripts/entity/Entity.js" type="text/javascript" charset="utf-8"></script>
+        <script src="scripts/entity/Player.js" type="text/javascript" charset="utf-8"></script>
+        <script src="scripts/entity/Shape.js" type="text/javascript" charset="utf-8"></script>
+        <script src="scripts/entity/Block.js" type="text/javascript" charset="utf-8"></script>
+        <script src="scripts/entity/Bullet.js" type="text/javascript" charset="utf-8"></script>
+        <script src="scripts/level/Camera.js" type="text/javascript" charset="utf-8"></script>
+        <script src="scripts/level/Level.js" type="text/javascript" charset="utf-8"></script>
+        <script src="scripts/main.js" type="text/javascript" charset="utf-8"></script>
+
+        <script type="text/coffeescript"> 
+            window.addEventListener "load", (->main.init()), false
+        </script>
+    </body>
+</html>
