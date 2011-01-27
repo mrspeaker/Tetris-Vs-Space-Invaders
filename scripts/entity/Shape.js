@@ -26,24 +26,23 @@ Shape = (function() {
     this.blocks = [];
   }
   Shape.prototype.init = function(level) {
-    var block, filled, i, j, total, _ref, _ref2;
+    var block, filled, i, j, total, _ref, _results;
     this.level = level;
     total = 0;
     filled = 0;
+    _results = [];
     for (j = 0, _ref = this.yBlocks; (0 <= _ref ? j <= _ref : j >= _ref); (0 <= _ref ? j += 1 : j -= 1)) {
-      for (i = 0, _ref2 = this.xBlocks; (0 <= _ref2 ? i <= _ref2 : i >= _ref2); (0 <= _ref2 ? i += 1 : i -= 1)) {
-        total++;
-        if (Math.random() <= this.blockChance) {
-          filled++;
-          block = new Block(this, i, j, this.blockWidth, this.blockHeight);
-          this.blocks.push(block);
-          this.level.add(block);
+      _results.push((function() {
+        var _ref, _results;
+        _results = [];
+        for (i = 0, _ref = this.xBlocks; (0 <= _ref ? i <= _ref : i >= _ref); (0 <= _ref ? i += 1 : i -= 1)) {
+          total++;
+          _results.push(Math.random() <= this.blockChance ? (filled++, block = new Block(this, i, j, this.blockWidth, this.blockHeight), this.blocks.push(block), this.level.add(block)) : void 0);
         }
-      }
+        return _results;
+      }).call(this));
     }
-    if (filled === 0) {
-      return "lol";
-    }
+    return _results;
   };
   Shape.prototype.tick = function() {
     this.time++;
@@ -56,8 +55,9 @@ Shape = (function() {
     }
     if (this.time++ < 150) {
       return;
+    } else {
+      this.time = 0;
     }
-    this.time = 0;
     if (!this.tryMove()) {
       return;
     }
@@ -89,6 +89,7 @@ Shape = (function() {
         return false;
       }
     }
+    return this.level.spawn();
   };
   Shape.prototype.fuseShape = function() {
     var block, _i, _len, _ref, _results;

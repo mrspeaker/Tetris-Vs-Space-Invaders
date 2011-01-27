@@ -1,3 +1,7 @@
+Utils =
+    colour: -> "rgb(#{@rnd()},#{@rnd()},#{@rnd()})"
+    rnd: -> ~~(Math.random() * 255)
+
 Events =
     events: {}
     bind: (type, func) ->

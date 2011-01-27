@@ -21,7 +21,7 @@ class Shape extends Entity
                     block = new Block this, i, j, @blockWidth, @blockHeight
                     @blocks.push block
                     @level.add block
-        if filled == 0 then "lol"
+
     tick: ->
         @time++
         @move()
@@ -31,8 +31,7 @@ class Shape extends Entity
 
     move: ->
         if not @moving then return
-        if @time++ < 150 then return
-        @time = 0
+        if @time++ < 150 then return else @time = 0
         if not @tryMove() then return
         @y += @blockHeight
 
@@ -52,7 +51,7 @@ class Shape extends Entity
         for block in @blocks
             if not block.removed
                 return false
-        #@level.spawn()
+        @level.spawn()
     
     fuseShape: ->
         for block in @blocks

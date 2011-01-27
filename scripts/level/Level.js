@@ -1,5 +1,29 @@
-var Level;
+var Level, Spawner;
 var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+Spawner = {
+  lastX: 0,
+  lastW: 0,
+  setDimensions: function(fieldWidth) {
+    this.fieldWidth = fieldWidth;
+  },
+  spawn: function(level) {
+    var color, height, ne, ns, oe, os, width, x;
+    color = Utils.colour();
+    width = ~~(Math.random() * 4) + 1;
+    height = ~~(Math.random() * 1) + 1;
+    os = oe = ns = ne = 0;
+    while (!(ne < os || ns > oe)) {
+      x = ~~(Math.random() * this.fieldWidth - width + 1);
+      os = this.lastX;
+      oe = this.lastX + this.lastW;
+      ns = x;
+      ne = x + width;
+    }
+    this.lastX = x;
+    this.lastW = width;
+    return level.add(new Shape(x * 30, 0, width, height, color));
+  }
+};
 Level = (function() {
   function Level(screen, width, height, spawnX, spawnY) {
     this.screen = screen;
@@ -12,9 +36,10 @@ Level = (function() {
     this.fieldWidth = ~~(this.width / this.blockWidth) - 1;
     this.fieldHeight = ~~(this.height / this.blockHeight) - 1;
     this.field = this.initField(this.field, this.fieldWidth, this.fieldHeight);
-    this.spawn();
+    Spawner.setDimensions(this.fieldWidth);
+    Spawner.spawn(this);
     _.delay((__bind(function() {
-      return this.spawn();
+      return Spawner.spawn(this);
     }, this)), 5000);
     this.player = this.add(new Player(spawnX, spawnY, 20, 20));
   }
@@ -54,15 +79,7 @@ Level = (function() {
     return this.entities = aliveEntities;
   };
   Level.prototype.spawn = function() {
-    var color, height, width, x;
-    color = "rgb(" + (this.rnd()) + "," + (this.rnd()) + "," + (this.rnd()) + ")";
-    width = ~~(Math.random() * 2) + 1;
-    height = ~~(Math.random() * 1) + 1;
-    x = ~~(Math.random() * this.fieldWidth - width + 1) * 30;
-    return this.add(new Shape(x, 0, width, height, color));
-  };
-  Level.prototype.rnd = function() {
-    return ~~(Math.random() * 255);
+    return Spawner.spawn(this);
   };
   Level.prototype.add = function(entity) {
     entity.init(this);

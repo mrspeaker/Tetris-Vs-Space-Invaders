@@ -1,4 +1,12 @@
-var Events;
+var Events, Utils;
+Utils = {
+  colour: function() {
+    return "rgb(" + (this.rnd()) + "," + (this.rnd()) + "," + (this.rnd()) + ")";
+  },
+  rnd: function() {
+    return ~~(Math.random() * 255);
+  }
+};
 Events = {
   events: {},
   bind: function(type, func) {

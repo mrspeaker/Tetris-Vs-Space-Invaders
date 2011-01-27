@@ -1,3 +1,25 @@
+Spawner =
+    lastX: 0
+    lastW: 0
+    setDimensions: (@fieldWidth) ->
+    spawn: (level) ->
+        color = Utils.colour()
+        width = ~~(Math.random() * 4) + 1
+        height = ~~(Math.random() * 1) + 1
+
+        # don't overlap last spawn
+        os = oe = ns = ne = 0
+        until ne < os or ns > oe
+            x = ~~(Math.random() * @fieldWidth - width + 1)
+            os = @lastX
+            oe = @lastX + @lastW
+            ns = x
+            ne = x + width
+        @lastX = x
+        @lastW = width
+        level.add new Shape x * 30, 0, width, height, color
+
+
 class Level
     constructor: (@screen, @width, @height, spawnX, spawnY) ->
         
@@ -9,10 +31,9 @@ class Level
         @fieldHeight =  ~~(@height / @blockHeight)-1
         @field = @initField(@field, @fieldWidth, @fieldHeight)
 
-        @spawn()
-        _.delay (=> @spawn()), 5000
-
-        #@add new Shape 30 * 7, 3 * 30, 4, 2, "#c0ffee"
+        Spawner.setDimensions(@fieldWidth)
+        Spawner.spawn(this)
+        _.delay (=> Spawner.spawn(this)), 5000
         @player = @add new Player spawnX, spawnY, 20, 20
 
     initField: (field, x,y) ->
@@ -38,14 +59,8 @@ class Level
         @entities = aliveEntities
 
     spawn: ->
-        color = "rgb(#{@rnd()},#{@rnd()},#{@rnd()})"
-        width = ~~(Math.random() * 2) + 1
-        height = ~~(Math.random() * 1) + 1
-        x = ~~(Math.random() * @fieldWidth - width + 1) * 30
+        Spawner.spawn(this)
         
-        @add new Shape x, 0, width, height, color
-        
-    rnd: -> ~~(Math.random() * 255)
     add: (entity) ->
         entity.init this
         @newEntities.push entity
