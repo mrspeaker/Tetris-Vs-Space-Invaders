@@ -30,7 +30,6 @@ Level = (function() {
     this.width = width;
     this.height = height;
     this.entities = [];
-    this.newEntities = [];
     this.blockWidth = 30;
     this.blockHeight = 30;
     this.fieldWidth = ~~(this.width / this.blockWidth) - 1;
@@ -60,31 +59,68 @@ Level = (function() {
     return field;
   };
   Level.prototype.tick = function(input) {
-    var aliveEntities, e, _i, _j, _len, _len2, _ref, _ref2;
+    var aliveEntities;
     aliveEntities = [];
-    _ref = this.entities;
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      e = _ref[_i];
-      if (!e.removed) {
-        e.tick(input);
-        aliveEntities.push(e);
-      }
-    }
-    _ref2 = this.newEntities;
-    for (_j = 0, _len2 = _ref2.length; _j < _len2; _j++) {
-      e = _ref2[_j];
-      aliveEntities.push(e);
-    }
-    this.newEntities = [];
+    for(var i = 0; i < this.entities.length; i++){
+            var ent = this.entities[i];
+            if(!ent.removed){
+                ent.tick(input);
+                aliveEntities.push(ent);
+            }
+        };
     return this.entities = aliveEntities;
-  };
-  Level.prototype.spawn = function() {
-    return Spawner.spawn(this);
   };
   Level.prototype.add = function(entity) {
     entity.init(this);
-    this.newEntities.push(entity);
+    this.entities.push(entity);
     return entity;
+  };
+  Level.prototype.fuseShape = function(shape) {
+    var block, newRow, newRows, numNewRows, row, _i, _j, _k, _len, _len2, _ref, _ref2, _ref3;
+    _ref = shape.blocks;
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      block = _ref[_i];
+      if (!block.removed) {
+        block.active = false;
+        this.field[block.yLoc][block.xLoc] = 1;
+      }
+    }
+    Spawner.spawn(this);
+    this.field = _.map(this.field, function(row) {
+      if (_.all(row)) {
+        return null;
+      } else {
+        return row;
+      }
+    });
+    this.field = _.compact(this.field);
+    numNewRows = this.fieldHeight - (this.field.length - 1);
+    console.log(numNewRows);
+    if (numNewRows > 0) {
+      newRows = [];
+      while (numNewRows--) {
+        console.log("new row");
+        newRow = [];
+        for (_j = 0, _ref2 = this.fieldWidth; (0 <= _ref2 ? _j <= _ref2 : _j >= _ref2); (0 <= _ref2 ? _j += 1 : _j -= 1)) {
+          newRow.push(0);
+        }
+        newRows.push(newRow);
+      }
+      console.log(newRows);
+      _ref3 = this.field;
+      for (_k = 0, _len2 = _ref3.length; _k < _len2; _k++) {
+        row = _ref3[_k];
+        newRows.push(row);
+      }
+      return this.field = newRows;
+    }
+    /*
+    for row, i in @level.field
+        if _.all row
+            console.log "GOT A LINE!!!!", i
+            for block in @blocks
+                remove() if block.yOff == i
+    */
   };
   Level.prototype.render = function(ctx, camera) {
     var blocks, e, row, x, y, _i, _len, _len2, _len3, _ref, _ref2;
@@ -106,6 +142,9 @@ Level = (function() {
   };
   Level.prototype.gameOver = function() {
     return main.reset();
+  };
+  Level.prototype.getBoxPos = function(x, y) {
+    return [~~(x / this.blockWidth), ~~(y / this.blockHeight)];
   };
   Level.prototype.getColliding = function(xc, yc, w, h, entities) {
     var e, hits, r, x0, x1, y0, y1, _i, _len, _ref;

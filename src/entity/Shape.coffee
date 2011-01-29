@@ -25,7 +25,6 @@ class Shape extends Entity
     tick: ->
         @time++
         @move()
-        #@fire() if (Math.random() * 1000) < 2
 
     render: (ctx) ->
 
@@ -37,40 +36,21 @@ class Shape extends Entity
 
     tryMove: ->
         for block in @blocks
+            continue if block.removed
             nextY = block.yLoc + 1
             hitBottom = block.yLoc == @level.fieldHeight - 1
             blocked = @level.field[ nextY ][ block.xLoc ] > 0
             if hitBottom or blocked
                 @moving = false
-                @fuseShape()
-                @level.spawn()
+                @level.fuseShape this
                 return false
-        return true
+        true
     
     checkDead: ->
         for block in @blocks
             if not block.removed
                 return false
-        @level.spawn()
-    
-    fuseShape: ->
-        for block in @blocks
-            if not block.removed
-                block.active = false
-                @level.field[block.yLoc][block.xLoc] = 1
-
-        ###@level.field = _.map @level.field, (row) ->
-            if _.all row then null else row
-        @level.field = _.compact @level.field
-        ###
-        ###
-        for row, i in @level.field
-            if _.all row
-                console.log "GOT A LINE!!!!", i
-                for block in @blocks
-                    remove() if block.yOff == i
-        ###            
-        
+        @level.fuseShape this
 
     fire: -> @level.add new Bullet ~~(@x + @w / 2) - 4, @y + @h, 0, 1.5
 

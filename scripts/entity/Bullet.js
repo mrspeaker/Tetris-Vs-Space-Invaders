@@ -25,7 +25,7 @@ Bullet = (function() {
   };
   Bullet.prototype.render = function(ctx) {
     ctx.fillStyle = "#0ff";
-    return ctx.fillRect(this.x, this.y, 1, 5);
+    return ctx.fillRect(this.x, this.y, 1, this.h);
   };
   Bullet.prototype.move = function() {
     this.x += this.xSpeed;

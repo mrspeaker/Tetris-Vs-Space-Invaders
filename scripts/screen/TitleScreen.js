@@ -28,7 +28,6 @@ TitleScreen = (function() {
     }
   };
   TitleScreen.prototype.drawSplash = function(ctx) {
-    return true;
     ctx.fillStyle = "rgb(" + (this.rnd()) + "," + (this.rnd()) + "," + (this.rnd()) + ")";
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     ctx.fillStyle = "#000";

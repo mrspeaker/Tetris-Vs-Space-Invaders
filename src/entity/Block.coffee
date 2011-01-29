@@ -13,7 +13,6 @@ class Block extends Entity
         @xLoc = ~~(@x / @w)
         @yLoc = ~~(@y / @h)
 
-
     render: (ctx) ->
         ctx.fillStyle = if @active then @shape.colour else "#333"
         ctx.fillRect @x, @y, @w - 1, @h - 1

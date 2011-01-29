@@ -17,6 +17,7 @@ Spawner =
             ne = x + width
         @lastX = x
         @lastW = width
+
         level.add new Shape x * 30, 0, width, height, color
 
 
@@ -24,19 +25,19 @@ class Level
     constructor: (@screen, @width, @height, spawnX, spawnY) ->
         
         @entities = []
-        @newEntities = []
+        
         @blockWidth =  30
         @blockHeight = 30
         @fieldWidth = ~~(@width / @blockWidth)-1
         @fieldHeight =  ~~(@height / @blockHeight)-1
         @field = @initField(@field, @fieldWidth, @fieldHeight)
-
+        
         Spawner.setDimensions(@fieldWidth)
         Spawner.spawn(this)
         _.delay (=> Spawner.spawn(this)), 5000
         @player = @add new Player spawnX, spawnY, 20, 20
 
-    initField: (field, x,y) ->
+    initField: (field, x, y) ->
         field = []
         field.push [] for [0..y]
         _.map field, (row) -> row.push 0 for [0..x]
@@ -45,26 +46,58 @@ class Level
     tick: (input) ->
         # process all entities
         aliveEntities = []
-        for e in @entities
-            if not e.removed
-                e.tick input
-                aliveEntities.push e
-
-        # add any new entities
-        for e in @newEntities
-            aliveEntities.push e
-        @newEntities = []
-
+        # the ent.tick event can change the array - so need to do it dynamically.
+        # or add a "new entities" array, which is sux
+        `for(var i = 0; i < this.entities.length; i++){
+            var ent = this.entities[i];
+            if(!ent.removed){
+                ent.tick(input);
+                aliveEntities.push(ent);
+            }
+        }`
         # return the updated entities list
         @entities = aliveEntities
-
-    spawn: ->
-        Spawner.spawn(this)
         
     add: (entity) ->
         entity.init this
-        @newEntities.push entity
+        @entities.push entity
         entity
+
+    fuseShape: (shape) ->
+        for block in shape.blocks
+            if not block.removed
+                block.active = false
+                @field[block.yLoc][block.xLoc] = 1
+        Spawner.spawn(this)
+
+        @field = _.map @field, (row) ->
+            if _.all row then null else row
+        @field = _.compact @field
+        numNewRows = @fieldHeight - (@field.length - 1)
+        console.log numNewRows
+        if numNewRows > 0
+            newRows = []
+            while numNewRows--
+                console.log "new row"
+                newRow = []
+                newRow.push 0 for [0..@fieldWidth]
+                newRows.push newRow
+            console.log newRows
+            for row in @field
+                newRows.push row
+            @field = newRows
+            
+        #newField = @initField(newField)
+        
+        ###
+        for row, i in @level.field
+            if _.all row
+                console.log "GOT A LINE!!!!", i
+                for block in @blocks
+                    remove() if block.yOff == i
+        ###
+
+
 
     render: (ctx, camera) ->
         #ctx.translate -camera.x, -camera.y
@@ -78,6 +111,9 @@ class Level
 
     gameOver: -> main.reset()
 
+    getBoxPos: (x, y)->
+        [~~(x / @blockWidth), ~~(y / @blockHeight)]
+        
     getColliding: (xc, yc, w, h, entities) ->
         hits = []
         r = 40;

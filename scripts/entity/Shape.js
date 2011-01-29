@@ -68,13 +68,15 @@ Shape = (function() {
     _ref = this.blocks;
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       block = _ref[_i];
+      if (block.removed) {
+        continue;
+      }
       nextY = block.yLoc + 1;
       hitBottom = block.yLoc === this.level.fieldHeight - 1;
       blocked = this.level.field[nextY][block.xLoc] > 0;
       if (hitBottom || blocked) {
         this.moving = false;
-        this.fuseShape();
-        this.level.spawn();
+        this.level.fuseShape(this);
         return false;
       }
     }
@@ -89,28 +91,7 @@ Shape = (function() {
         return false;
       }
     }
-    return this.level.spawn();
-  };
-  Shape.prototype.fuseShape = function() {
-    var block, _i, _len, _ref, _results;
-    _ref = this.blocks;
-    _results = [];
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      block = _ref[_i];
-      _results.push(!block.removed ? (block.active = false, this.level.field[block.yLoc][block.xLoc] = 1) : void 0);
-    }
-    return _results;
-    /*@level.field = _.map @level.field, (row) ->
-        if _.all row then null else row
-    @level.field = _.compact @level.field
-    */
-    /*
-    for row, i in @level.field
-        if _.all row
-            console.log "GOT A LINE!!!!", i
-            for block in @blocks
-                remove() if block.yOff == i
-    */
+    return this.level.fuseShape(this);
   };
   Shape.prototype.fire = function() {
     return this.level.add(new Bullet(~~(this.x + this.w / 2) - 4, this.y + this.h, 0, 1.5));
