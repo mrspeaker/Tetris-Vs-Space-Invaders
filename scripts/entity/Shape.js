@@ -58,19 +58,21 @@ Shape = (function() {
     } else {
       this.time = 0;
     }
+    if (this.level.dir !== direction.NONE && this.tryMoveX()) {
+      if (this.level.dir === direction.LEFT) {
+        this.x += this.level.blockWidth;
+      }
+      if (this.level.dir === direction.RIGHT) {
+        this.x -= this.level.blockWidth;
+      }
+    }
     if (!this.tryMove()) {
       return;
     }
-    this.y += this.blockHeight;
-    if (this.level.dir === direction.LEFT) {
-      this.x += this.level.blockWidth;
-    }
-    if (this.level.dir === direction.RIGHT) {
-      return this.x -= this.level.blockWidth;
-    }
+    return this.y += this.blockHeight;
   };
   Shape.prototype.tryMove = function() {
-    var block, blocked, hitBottom, nextY, _i, _len, _ref;
+    var block, blocked, hitBottom, nextX, nextY, _i, _len, _ref;
     _ref = this.blocks;
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       block = _ref[_i];
@@ -78,11 +80,37 @@ Shape = (function() {
         continue;
       }
       nextY = block.yTile + 1;
+      nextX = block.xTile;
+      if (this.level.dir === direction.LEFT && nextX < this.level.fieldWidth) {
+        nextX++;
+      }
+      if (this.level.dir === direction.RIGHT && nextX > 0) {
+        nextX--;
+      }
       hitBottom = block.yTile === this.level.fieldHeight - 1;
-      blocked = this.level.field[nextY][block.xTile] > 0;
+      blocked = this.level.field[nextY][nextX] > 0;
       if (hitBottom || blocked) {
         this.moving = false;
         this.level.fuseShape(this);
+        return false;
+      }
+    }
+    return true;
+  };
+  Shape.prototype.tryMoveX = function() {
+    var block, nextX, _i, _len, _ref;
+    _ref = this.blocks;
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      block = _ref[_i];
+      if (block.removed) {
+        continue;
+      }
+      nextX = block.xTile;
+      nextX += this.level.dir === direction.LEFT ? 1 : -1;
+      if (nextX < 0 || nextX > this.level.fieldWidth) {
+        return false;
+      }
+      if (this.level.field[block.yTile][nextX] > 0) {
         return false;
       }
     }

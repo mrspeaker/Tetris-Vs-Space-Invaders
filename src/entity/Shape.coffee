@@ -27,26 +27,42 @@ class Shape extends Entity
         @move()
 
     render: (ctx) ->
-        if @level.dir
+        #if @level.dir
 
     move: ->
         if not @moving then return
         if @time++ < 150 then return else @time = 0
+
+        if @level.dir isnt direction.NONE and @tryMoveX()
+            if @level.dir is direction.LEFT then @x += @level.blockWidth
+            if @level.dir is direction.RIGHT then @x -= @level.blockWidth
+
         if not @tryMove() then return
         @y += @blockHeight
-        if @level.dir is direction.LEFT then @x += @level.blockWidth
-        if @level.dir is direction.RIGHT then @x -= @level.blockWidth
+
 
     tryMove: ->
         for block in @blocks
             continue if block.removed
             nextY = block.yTile + 1
+            nextX = block.xTile
+            if @level.dir is direction.LEFT and nextX < @level.fieldWidth then nextX++
+            if @level.dir is direction.RIGHT and nextX > 0 then nextX--
             hitBottom = block.yTile == @level.fieldHeight - 1
-            blocked = @level.field[ nextY ][ block.xTile ] > 0
+            blocked = @level.field[ nextY ][ nextX ] > 0
             if hitBottom or blocked
                 @moving = false
                 @level.fuseShape this
                 return false
+        true
+        
+    tryMoveX: ->
+        for block in @blocks
+            continue if block.removed
+            nextX = block.xTile
+            nextX += if @level.dir == direction.LEFT then 1 else -1
+            return false if nextX < 0 or nextX > @level.fieldWidth
+            return false if @level.field[ block.yTile ][ nextX ] > 0
         true
     
     checkDead: ->

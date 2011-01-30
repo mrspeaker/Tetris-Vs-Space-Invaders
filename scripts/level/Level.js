@@ -186,9 +186,7 @@ Level = (function() {
       ctx.scale(0.8, 0.8);
       ctx.translate(50, 50);
     }
-    console.log(this.dir, this.isRotLeft, this.isRotRight, this.isNotRot);
     if (this.dir === direction.LEFT && !this.isRotLeft) {
-      console.log("ROT LEF");
       rot = Math.PI * (10 / 180);
       this.rot += rot;
       ctx.rotate(rot);
@@ -199,15 +197,17 @@ Level = (function() {
       rot = Math.PI * (-10 / 180);
       this.rot += rot;
       ctx.rotate(rot);
-      console.log("ROT R");
       this.isRotRight = true;
       this.isRotLeft = this.isNotRot = false;
     }
     if (this.dir === direction.NONE && !this.isNotRot) {
-      console.log("ROT 0");
-      ctx.rotate(-this.rot);
-      this.rot = 0;
-      this.isNotRot = true;
+      this.rot += Math.PI * (1 / 180);
+      ctx.rotate(Math.PI * (1 / 180));
+      if (this.rot > 0) {
+        ctx.rotate(-this.rot);
+        this.rot = 0;
+        this.isNotRot = true;
+      }
       this.isRotLeft = this.isRotRight = false;
     }
     _ref = this.field;

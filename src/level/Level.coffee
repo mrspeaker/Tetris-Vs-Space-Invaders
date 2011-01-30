@@ -42,7 +42,6 @@ class Level
         @isRotLeft = @isRotRight = false
         @isNotRot = true
         @rot = 0
-        
         @time = 0
 
     initMap: (x, y, valFunc) ->
@@ -153,9 +152,7 @@ class Level
             ctx.scale 0.8, 0.8
             ctx.translate 50, 50
         #ctx.translate -camera.x, -camera.y
-        console.log @dir, @isRotLeft, @isRotRight, @isNotRot
         if @dir == direction.LEFT and not @isRotLeft
-            console.log "ROT LEF"
             rot = Math.PI * (10/180)
             @rot += rot
             ctx.rotate rot
@@ -165,14 +162,18 @@ class Level
             rot = Math.PI * (-10/180)
             @rot += rot
             ctx.rotate rot
-            console.log "ROT R"
             @isRotRight = true
             @isRotLeft = @isNotRot = false
         if @dir == direction.NONE and not @isNotRot
-            console.log "ROT 0"
-            ctx.rotate -@rot
-            @rot = 0
-            @isNotRot = true
+            @rot += Math.PI * (1/180)
+            ctx.rotate Math.PI * (1/180)
+            if @rot > 0
+                ctx.rotate -@rot
+                @rot = 0
+                @isNotRot = true
+            
+            #@rot = 0
+            #@isNotRot = true
             @isRotLeft = @isRotRight = false
         
         for row, y in @field
