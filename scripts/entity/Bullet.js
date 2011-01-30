@@ -39,7 +39,7 @@ Bullet = (function() {
   };
   Bullet.prototype.collisions = function() {
     var e, entities, _i, _len, _results;
-    entities = this.level.getColliding(this.x, this.y, 1, 1);
+    entities = this.level.getInTile(this.xTile, this.yTile);
     _results = [];
     for (_i = 0, _len = entities.length; _i < _len; _i++) {
       e = entities[_i];

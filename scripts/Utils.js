@@ -5,6 +5,20 @@ Utils = {
   },
   rnd: function() {
     return ~~(Math.random() * 255);
+  },
+  remove: function(arr, from, to) {
+    arr.splice(from, (to || from || 1) + (from < 0 ? arr.length : 0));
+    return arr;
+  },
+  removeObj: function(obj, arr) {
+    var el, i, _len;
+    for (i = 0, _len = arr.length; i < _len; i++) {
+      el = arr[i];
+      if (el === obj) {
+        Utils.remove(arr, i, i);
+      }
+    }
+    return arr;
   }
 };
 Events = {

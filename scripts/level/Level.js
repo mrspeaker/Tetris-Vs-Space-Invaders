@@ -34,7 +34,12 @@ Level = (function() {
     this.blockHeight = 30;
     this.fieldWidth = ~~(this.width / this.blockWidth) - 1;
     this.fieldHeight = ~~(this.height / this.blockHeight) - 1;
-    this.field = this.initField(this.field, this.fieldWidth, this.fieldHeight);
+    this.field = this.initMap(this.fieldWidth, this.fieldHeight, function() {
+      return 0;
+    });
+    this.entityMap = this.initMap(this.fieldWidth, this.fieldHeight, function() {
+      return [];
+    });
     Spawner.setDimensions(this.fieldWidth);
     Spawner.spawn(this);
     _.delay((__bind(function() {
@@ -42,38 +47,65 @@ Level = (function() {
     }, this)), 5000);
     this.player = this.add(new Player(spawnX, spawnY, 20, 20));
   }
-  Level.prototype.initField = function(field, x, y) {
-    var _i;
-    field = [];
+  Level.prototype.initMap = function(x, y, valFunc) {
+    var grid, _i;
+    grid = [];
     for (_i = 0; (0 <= y ? _i <= y : _i >= y); (0 <= y ? _i += 1 : _i -= 1)) {
-      field.push([]);
+      grid.push([]);
     }
-    _.map(field, function(row) {
+    _.map(grid, function(row) {
       var _i, _results;
       _results = [];
       for (_i = 0; (0 <= x ? _i <= x : _i >= x); (0 <= x ? _i += 1 : _i -= 1)) {
-        _results.push(row.push(0));
+        _results.push(row.push(valFunc()));
       }
       return _results;
     });
-    return field;
+    return grid;
   };
   Level.prototype.tick = function(input) {
-    var aliveEntities;
+    var aliveEntities, procEnt;
     aliveEntities = [];
-    for(var i = 0; i < this.entities.length; i++){
-            var ent = this.entities[i];
-            if(!ent.removed){
-                ent.tick(input);
-                aliveEntities.push(ent);
-            }
-        };
+    procEnt = function(ent, arrIdx) {
+      var xTileOld, yTileOld, _ref;
+      xTileOld = ent.xTile;
+      yTileOld = ent.yTile;
+      if (!ent.removed) {
+        ent.tick(input);
+        aliveEntities.push(ent);
+      }
+      _ref = this.getTilePos(ent), ent.xTile = _ref[0], ent.yTile = _ref[1];
+      if (ent.removed) {
+        if (this.tileInMap(ent.xTile, ent.yTile)) {
+          return Utils.removeObj(ent, this.entityMap[yTileOld][xTileOld]);
+        } else {
+          return console.log("out!", ent, ent.xTile, ent.yTile);
+        }
+      } else {
+        if (ent.xTile !== xTileOld || ent.yTile !== yTileOld) {
+          if (this.tileInMap(ent.xTile, ent.yTile)) {
+            Utils.removeObj(ent, this.entityMap[yTileOld][xTileOld]);
+          }
+          if (this.tileInMap(ent.xTile, ent.yTile)) {
+            return this.entityMap[ent.yTile][ent.xTile].push(ent);
+          }
+        }
+      }
+    };
+    for(var i = 0; i < this.entities.length; i++){ procEnt.call(this, this.entities[i]); };
     return this.entities = aliveEntities;
   };
-  Level.prototype.add = function(entity) {
-    entity.init(this);
-    this.entities.push(entity);
-    return entity;
+  Level.prototype.add = function(ent) {
+    var _ref;
+    this.entities.push(ent);
+    ent.init(this);
+    _ref = this.getTilePos(ent), ent.xTile = _ref[0], ent.yTile = _ref[1];
+    if (this.tileInMap(ent.xTile, ent.yTile)) {
+      this.entityMap[ent.yTile][ent.xTile].push(ent);
+    } else {
+      console.log("out!", ent, ent.xTile, ent.yTile);
+    }
+    return ent;
   };
   Level.prototype.fuseShape = function(shape) {
     var block, newRow, newRows, numNewRows, row, _i, _j, _k, _len, _len2, _ref, _ref2, _ref3;
@@ -82,20 +114,26 @@ Level = (function() {
       block = _ref[_i];
       if (!block.removed) {
         block.active = false;
-        this.field[block.yLoc][block.xLoc] = 1;
+        this.field[block.yTile][block.xTile] = 1;
       }
     }
     Spawner.spawn(this);
-    this.field = _.map(this.field, function(row) {
+    this.field = _.map(this.field, function(row, i) {
+      var block, _i, _len, _ref;
       if (_.all(row)) {
-        return null;
-      } else {
-        return row;
+        _ref = shape.blocks;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          block = _ref[_i];
+          if (block.yOff === i) {
+            remove();
+          }
+        }
+        null;
       }
+      return row;
     });
     this.field = _.compact(this.field);
     numNewRows = this.fieldHeight - (this.field.length - 1);
-    console.log(numNewRows);
     if (numNewRows > 0) {
       newRows = [];
       while (numNewRows--) {
@@ -106,7 +144,6 @@ Level = (function() {
         }
         newRows.push(newRow);
       }
-      console.log(newRows);
       _ref3 = this.field;
       for (_k = 0, _len2 = _ref3.length; _k < _len2; _k++) {
         row = _ref3[_k];
@@ -143,8 +180,21 @@ Level = (function() {
   Level.prototype.gameOver = function() {
     return main.reset();
   };
-  Level.prototype.getBoxPos = function(x, y) {
-    return [~~(x / this.blockWidth), ~~(y / this.blockHeight)];
+  Level.prototype.tileInMap = function(xTile, yTile) {
+    return xTile >= 0 && yTile >= 0 && xTile < this.fieldWidth && yTile < this.fieldHeight;
+  };
+  Level.prototype.getTilePos = function(entity) {
+    return [~~(entity.x / this.blockWidth), ~~(entity.y / this.blockHeight)];
+  };
+  Level.prototype.getInTile = function(xTile, yTile) {
+    var entity, hits, _i, _len, _ref;
+    hits = [];
+    _ref = this.entityMap[yTile][xTile];
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      entity = _ref[_i];
+      hits.push(entity);
+    }
+    return hits;
   };
   Level.prototype.getColliding = function(xc, yc, w, h, entities) {
     var e, hits, r, x0, x1, y0, y1, _i, _len, _ref;

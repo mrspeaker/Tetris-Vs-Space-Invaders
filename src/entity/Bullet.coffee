@@ -20,7 +20,9 @@ class Bullet extends Entity
         if @y < -5 or @y > @level.height then @remove()
 
     collisions: ->
-        entities = @level.getColliding @x, @y, 1, 1
+        #entities = @level.getColliding @x, @y, 1, 1
+        entities = @level.getInTile @xTile, @yTile
+        
         #[xBox, yBox] = @level.getBoxPos @x, @y
         #console.log(xBox, yBox, @level.field[yBox][xBox])
         #for row in @level.fields

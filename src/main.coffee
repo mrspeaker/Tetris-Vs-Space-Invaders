@@ -3,7 +3,7 @@
     by Mr Speaker    
 ###
 main =
-    rate: 10
+    rate: 20
 
     init: -> 
         console.log "game init"
@@ -13,7 +13,9 @@ main =
         @run()
 
     stop: -> @running = false
-    start: -> @running = true
+    start: -> 
+        @running = true
+        @run()
     reset: ->
         @screen = null
         @input = null

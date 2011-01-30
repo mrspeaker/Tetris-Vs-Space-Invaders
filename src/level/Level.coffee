@@ -30,51 +30,81 @@ class Level
         @blockHeight = 30
         @fieldWidth = ~~(@width / @blockWidth)-1
         @fieldHeight =  ~~(@height / @blockHeight)-1
-        @field = @initField(@field, @fieldWidth, @fieldHeight)
+        
+        @field = @initMap @fieldWidth, @fieldHeight, -> 0
+        @entityMap = @initMap @fieldWidth, @fieldHeight, -> []
         
         Spawner.setDimensions(@fieldWidth)
         Spawner.spawn(this)
         _.delay (=> Spawner.spawn(this)), 5000
         @player = @add new Player spawnX, spawnY, 20, 20
 
-    initField: (field, x, y) ->
-        field = []
-        field.push [] for [0..y]
-        _.map field, (row) -> row.push 0 for [0..x]
-        field
+    initMap: (x, y, valFunc) ->
+        # Create a "x" by "y" - matrix with the default value "val"
+        grid = []
+        grid.push [] for [0..y]
+        _.map grid, (row) -> row.push valFunc() for [0..x]
+        grid
 
     tick: (input) ->
         # process all entities
         aliveEntities = []
-        # the ent.tick event can change the array - so need to do it dynamically.
-        # or add a "new entities" array, which is sux
-        `for(var i = 0; i < this.entities.length; i++){
-            var ent = this.entities[i];
-            if(!ent.removed){
-                ent.tick(input);
-                aliveEntities.push(ent);
-            }
-        }`
+        
+        procEnt = (ent, arrIdx) ->
+            xTileOld = ent.xTile
+            yTileOld = ent.yTile
+            if not ent.removed
+                ent.tick input
+                aliveEntities.push ent
+            [ent.xTile, ent.yTile] = @getTilePos ent
+            if ent.removed
+                # remove from map
+                if @tileInMap ent.xTile, ent.yTile
+                    Utils.removeObj ent, @entityMap[yTileOld][xTileOld]
+                else
+                    console.log "out!", ent, ent.xTile, ent.yTile
+                 
+                # remove from entities - do i-- to move back up the array proc! - maybe not, cause "aliveEnitites" does htis.
+            else
+                if ent.xTile isnt xTileOld or ent.yTile isnt yTileOld
+                    # remove old ref in map
+                    if @tileInMap ent.xTile, ent.yTile
+                        Utils.removeObj ent, @entityMap[yTileOld][xTileOld]
+                    # add new ref in map
+                    if @tileInMap ent.xTile, ent.yTile
+                        @entityMap[ent.yTile][ent.xTile].push ent
+
+        # the ent.tick event can change the array len & pointer - so need to do it dynamically.                
+        `for(var i = 0; i < this.entities.length; i++){ procEnt.call(this, this.entities[i]); }`
+
         # return the updated entities list
         @entities = aliveEntities
         
-    add: (entity) ->
-        entity.init this
-        @entities.push entity
-        entity
+    add: (ent) ->
+        @entities.push ent
+        ent.init this
+        [ent.xTile, ent.yTile] = @getTilePos ent
+        if @tileInMap ent.xTile, ent.yTile
+            @entityMap[ent.yTile][ent.xTile].push ent
+        else
+            console.log "out!", ent, ent.xTile, ent.yTile
+        ent
 
     fuseShape: (shape) ->
         for block in shape.blocks
             if not block.removed
                 block.active = false
-                @field[block.yLoc][block.xLoc] = 1
-        Spawner.spawn(this)
+                @field[block.yTile][block.xTile] = 1
+        Spawner.spawn this
 
-        @field = _.map @field, (row) ->
-            if _.all row then null else row
+        @field = _.map @field, (row, i) ->
+            if _.all row
+                for block in shape.blocks
+                    remove() if block.yOff == i
+                null 
+            return row            
         @field = _.compact @field
         numNewRows = @fieldHeight - (@field.length - 1)
-        console.log numNewRows
         if numNewRows > 0
             newRows = []
             while numNewRows--
@@ -82,7 +112,6 @@ class Level
                 newRow = []
                 newRow.push 0 for [0..@fieldWidth]
                 newRows.push newRow
-            console.log newRows
             for row in @field
                 newRows.push row
             @field = newRows
@@ -111,8 +140,14 @@ class Level
 
     gameOver: -> main.reset()
 
-    getBoxPos: (x, y)->
-        [~~(x / @blockWidth), ~~(y / @blockHeight)]
+    tileInMap: (xTile, yTile) -> xTile >= 0 and yTile >= 0 and xTile < @fieldWidth and yTile < @fieldHeight
+    getTilePos: (entity)->
+        [~~(entity.x / @blockWidth), ~~(entity.y / @blockHeight)]
+        
+    getInTile: (xTile, yTile) ->
+        hits = []
+        hits.push entity for entity in @entityMap[yTile][xTile]
+        hits
         
     getColliding: (xc, yc, w, h, entities) ->
         hits = []

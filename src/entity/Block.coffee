@@ -10,8 +10,8 @@ class Block extends Entity
         @setSquare()
 
     setSquare: ->
-        @xLoc = ~~(@x / @w)
-        @yLoc = ~~(@y / @h)
+        @xTile = ~~(@x / @w)
+        @yTile = ~~(@y / @h)
 
     render: (ctx) ->
         ctx.fillStyle = if @active then @shape.colour else "#333"

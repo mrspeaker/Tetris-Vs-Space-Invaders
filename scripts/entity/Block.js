@@ -25,8 +25,8 @@ Block = (function() {
     return this.setSquare();
   };
   Block.prototype.setSquare = function() {
-    this.xLoc = ~~(this.x / this.w);
-    return this.yLoc = ~~(this.y / this.h);
+    this.xTile = ~~(this.x / this.w);
+    return this.yTile = ~~(this.y / this.h);
   };
   Block.prototype.render = function(ctx) {
     ctx.fillStyle = this.active ? this.shape.colour : "#333";

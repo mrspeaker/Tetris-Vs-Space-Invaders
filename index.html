@@ -5,7 +5,7 @@
     </head>
     <body>
         <canvas id="screen" width="450" height="450"></canvas>
-
+        <button id="gosto">gosto</button>
         <script src="lib/coffee-script.js" type="text/javascript" charset="utf-8"></script>
         <script src="lib/underscore.js" type="text/javascript" charset="utf-8"></script>
         <script src="scripts/Utils.js" type="text/javascript" charset="utf-8"></script>
@@ -25,8 +25,13 @@
         <script src="scripts/level/Level.js" type="text/javascript" charset="utf-8"></script>
         <script src="scripts/main.js" type="text/javascript" charset="utf-8"></script>
 
-        <script type="text/coffeescript"> 
-            window.addEventListener "load", (->main.init()), false
+        <script type="text/coffeescript">
+            $ = (sel) -> document.querySelector sel
+
+            window.addEventListener "load", ->
+                main.init()
+                $("#gosto").addEventListener "click", (-> if main.running then main.stop() else main.start()), false
+            , false
         </script>
     </body>
 </html>

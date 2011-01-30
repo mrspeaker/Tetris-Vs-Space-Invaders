@@ -4,7 +4,7 @@
 */var main;
 var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 main = {
-  rate: 10,
+  rate: 20,
   init: function() {
     console.log("game init");
     this.ctx = document.getElementById("screen").getContext("2d");
@@ -16,7 +16,8 @@ main = {
     return this.running = false;
   },
   start: function() {
-    return this.running = true;
+    this.running = true;
+    return this.run();
   },
   reset: function() {
     this.screen = null;

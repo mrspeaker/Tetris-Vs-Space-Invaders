@@ -37,9 +37,9 @@ class Shape extends Entity
     tryMove: ->
         for block in @blocks
             continue if block.removed
-            nextY = block.yLoc + 1
-            hitBottom = block.yLoc == @level.fieldHeight - 1
-            blocked = @level.field[ nextY ][ block.xLoc ] > 0
+            nextY = block.yTile + 1
+            hitBottom = block.yTile == @level.fieldHeight - 1
+            blocked = @level.field[ nextY ][ block.xTile ] > 0
             if hitBottom or blocked
                 @moving = false
                 @level.fuseShape this

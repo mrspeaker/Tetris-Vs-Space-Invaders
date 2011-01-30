@@ -11,6 +11,7 @@ GameScreen = (function() {
   __extends(GameScreen, Screen);
   function GameScreen() {
     this.level = new Level(this, 450, 450, 120, 420);
+    window.lev = this.level;
     this.camera = new Camera(this.level.width, this.level.height);
   }
   GameScreen.prototype.tick = function(input) {

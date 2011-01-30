@@ -71,9 +71,9 @@ Shape = (function() {
       if (block.removed) {
         continue;
       }
-      nextY = block.yLoc + 1;
-      hitBottom = block.yLoc === this.level.fieldHeight - 1;
-      blocked = this.level.field[nextY][block.xLoc] > 0;
+      nextY = block.yTile + 1;
+      hitBottom = block.yTile === this.level.fieldHeight - 1;
+      blocked = this.level.field[nextY][block.xTile] > 0;
       if (hitBottom || blocked) {
         this.moving = false;
         this.level.fuseShape(this);

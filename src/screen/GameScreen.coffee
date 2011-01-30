@@ -1,6 +1,7 @@
 class GameScreen extends Screen
     constructor: ->
         @level = new Level this, 450, 450, 120, 420
+        window.lev = @level
         @camera = new Camera @level.width, @level.height
 
     tick: (input) ->

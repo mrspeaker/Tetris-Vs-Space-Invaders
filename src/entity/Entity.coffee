@@ -11,6 +11,8 @@ class Entity
     y: 0
     w: 10
     h: 10
+    xTile: 0
+    yTile: 0
     dir: direction.NONE
     frame: 0
     removed: false
