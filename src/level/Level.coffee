@@ -38,6 +38,12 @@ class Level
         Spawner.spawn(this)
         _.delay (=> Spawner.spawn(this)), 5000
         @player = @add new Player spawnX, spawnY, 20, 20
+        
+        @isRotLeft = @isRotRight = false
+        @isNotRot = true
+        @rot = 0
+        
+        @time = 0
 
     initMap: (x, y, valFunc) ->
         # Create a "x" by "y" - matrix with the default value "val"
@@ -47,6 +53,9 @@ class Level
         grid
 
     tick: (input) ->
+        # proc input
+        @doInput(input)
+        
         # process all entities
         aliveEntities = []
         
@@ -79,7 +88,18 @@ class Level
 
         # return the updated entities list
         @entities = aliveEntities
-        
+        @time++
+    
+    doInput: (input) ->
+        down = 0
+        if input.buttons[input.UP] 
+            @dir = direction.RIGHT
+            down++
+        if input.buttons[input.DOWN]
+            @dir = direction.LEFT
+            down++
+        if down == 0 then @dir = direction.NONE
+
     add: (ent) ->
         @entities.push ent
         ent.init this
@@ -129,8 +149,34 @@ class Level
 
 
     render: (ctx, camera) ->
+        if @time == 0
+            ctx.scale 0.8, 0.8
+            ctx.translate 50, 50
         #ctx.translate -camera.x, -camera.y
+        console.log @dir, @isRotLeft, @isRotRight, @isNotRot
+        if @dir == direction.LEFT and not @isRotLeft
+            console.log "ROT LEF"
+            rot = Math.PI * (10/180)
+            @rot += rot
+            ctx.rotate rot
+            @isRotLeft = true
+            @isRotRight = @isNotRot = false
+        if @dir == direction.RIGHT and not @isRotRight
+            rot = Math.PI * (-10/180)
+            @rot += rot
+            ctx.rotate rot
+            console.log "ROT R"
+            @isRotRight = true
+            @isRotLeft = @isNotRot = false
+        if @dir == direction.NONE and not @isNotRot
+            console.log "ROT 0"
+            ctx.rotate -@rot
+            @rot = 0
+            @isNotRot = true
+            @isRotLeft = @isRotRight = false
+        
         for row, y in @field
+            continue if y == @fieldHeight
             for blocks, x in row
                 ctx.fillStyle = "#222"
                 ctx.fillRect x * @blockWidth, y * @blockHeight, @blockWidth - 1, @blockHeight - 1
@@ -140,7 +186,7 @@ class Level
 
     gameOver: -> main.reset()
 
-    tileInMap: (xTile, yTile) -> xTile >= 0 and yTile >= 0 and xTile < @fieldWidth and yTile < @fieldHeight
+    tileInMap: (xTile, yTile) -> xTile >= 0 and yTile >= 0 and xTile <= @fieldWidth and yTile <= @fieldHeight
     getTilePos: (entity)->
         [~~(entity.x / @blockWidth), ~~(entity.y / @blockHeight)]
         

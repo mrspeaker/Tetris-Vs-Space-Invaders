@@ -46,6 +46,10 @@ Level = (function() {
       return Spawner.spawn(this);
     }, this)), 5000);
     this.player = this.add(new Player(spawnX, spawnY, 20, 20));
+    this.isRotLeft = this.isRotRight = false;
+    this.isNotRot = true;
+    this.rot = 0;
+    this.time = 0;
   }
   Level.prototype.initMap = function(x, y, valFunc) {
     var grid, _i;
@@ -65,6 +69,7 @@ Level = (function() {
   };
   Level.prototype.tick = function(input) {
     var aliveEntities, procEnt;
+    this.doInput(input);
     aliveEntities = [];
     procEnt = function(ent, arrIdx) {
       var xTileOld, yTileOld, _ref;
@@ -93,7 +98,23 @@ Level = (function() {
       }
     };
     for(var i = 0; i < this.entities.length; i++){ procEnt.call(this, this.entities[i]); };
-    return this.entities = aliveEntities;
+    this.entities = aliveEntities;
+    return this.time++;
+  };
+  Level.prototype.doInput = function(input) {
+    var down;
+    down = 0;
+    if (input.buttons[input.UP]) {
+      this.dir = direction.RIGHT;
+      down++;
+    }
+    if (input.buttons[input.DOWN]) {
+      this.dir = direction.LEFT;
+      down++;
+    }
+    if (down === 0) {
+      return this.dir = direction.NONE;
+    }
   };
   Level.prototype.add = function(ent) {
     var _ref;
@@ -160,10 +181,41 @@ Level = (function() {
     */
   };
   Level.prototype.render = function(ctx, camera) {
-    var blocks, e, row, x, y, _i, _len, _len2, _len3, _ref, _ref2;
+    var blocks, e, rot, row, x, y, _i, _len, _len2, _len3, _ref, _ref2;
+    if (this.time === 0) {
+      ctx.scale(0.8, 0.8);
+      ctx.translate(50, 50);
+    }
+    console.log(this.dir, this.isRotLeft, this.isRotRight, this.isNotRot);
+    if (this.dir === direction.LEFT && !this.isRotLeft) {
+      console.log("ROT LEF");
+      rot = Math.PI * (10 / 180);
+      this.rot += rot;
+      ctx.rotate(rot);
+      this.isRotLeft = true;
+      this.isRotRight = this.isNotRot = false;
+    }
+    if (this.dir === direction.RIGHT && !this.isRotRight) {
+      rot = Math.PI * (-10 / 180);
+      this.rot += rot;
+      ctx.rotate(rot);
+      console.log("ROT R");
+      this.isRotRight = true;
+      this.isRotLeft = this.isNotRot = false;
+    }
+    if (this.dir === direction.NONE && !this.isNotRot) {
+      console.log("ROT 0");
+      ctx.rotate(-this.rot);
+      this.rot = 0;
+      this.isNotRot = true;
+      this.isRotLeft = this.isRotRight = false;
+    }
     _ref = this.field;
     for (y = 0, _len = _ref.length; y < _len; y++) {
       row = _ref[y];
+      if (y === this.fieldHeight) {
+        continue;
+      }
       for (x = 0, _len2 = row.length; x < _len2; x++) {
         blocks = row[x];
         ctx.fillStyle = "#222";
@@ -181,7 +233,7 @@ Level = (function() {
     return main.reset();
   };
   Level.prototype.tileInMap = function(xTile, yTile) {
-    return xTile >= 0 && yTile >= 0 && xTile < this.fieldWidth && yTile < this.fieldHeight;
+    return xTile >= 0 && yTile >= 0 && xTile <= this.fieldWidth && yTile <= this.fieldHeight;
   };
   Level.prototype.getTilePos = function(entity) {
     return [~~(entity.x / this.blockWidth), ~~(entity.y / this.blockHeight)];

@@ -22,17 +22,20 @@ class Shape extends Entity
                     @blocks.push block
                     @level.add block
 
-    tick: ->
+    tick: (input) ->
         @time++
         @move()
 
     render: (ctx) ->
+        if @level.dir
 
     move: ->
         if not @moving then return
         if @time++ < 150 then return else @time = 0
         if not @tryMove() then return
         @y += @blockHeight
+        if @level.dir is direction.LEFT then @x += @level.blockWidth
+        if @level.dir is direction.RIGHT then @x -= @level.blockWidth
 
     tryMove: ->
         for block in @blocks

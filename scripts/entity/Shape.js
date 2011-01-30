@@ -44,7 +44,7 @@ Shape = (function() {
     }
     return _results;
   };
-  Shape.prototype.tick = function() {
+  Shape.prototype.tick = function(input) {
     this.time++;
     return this.move();
   };
@@ -61,7 +61,13 @@ Shape = (function() {
     if (!this.tryMove()) {
       return;
     }
-    return this.y += this.blockHeight;
+    this.y += this.blockHeight;
+    if (this.level.dir === direction.LEFT) {
+      this.x += this.level.blockWidth;
+    }
+    if (this.level.dir === direction.RIGHT) {
+      return this.x -= this.level.blockWidth;
+    }
   };
   Shape.prototype.tryMove = function() {
     var block, blocked, hitBottom, nextY, _i, _len, _ref;

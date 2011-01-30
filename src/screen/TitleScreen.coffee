@@ -15,8 +15,9 @@ class TitleScreen extends Screen
         ctx.fillStyle = "#000"
         ctx.font = "bold 16px sans-serif"
         ctx.fillText "CoffeeScript Engine v0.1", 30, 43
-        ctx.fillText "space to fire/start", 30, 83
-        ctx.fillText "cursor to move, up to stop", 30, 103
+        ctx.fillText "space: fire/start", 30, 83
+        ctx.fillText "left/right: move ship", 30, 103
+        ctx.fillText "up/down: rotate world", 30, 113
         ctx.fillText "esc to pause", 30, 123
 
     rnd: -> ~~(Math.random() * 255)
